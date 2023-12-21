@@ -8,9 +8,12 @@ use winit::{
     event_loop::{ControlFlow, EventLoop},
     window::WindowBuilder,
 };
+use futures::executor;
+use loaders::json_loader::{load_json, log_init};
 
 fn main() {
     //let before = std::time::Instant::now();
+    log_init();
     env_logger::init();
     let event_loop = EventLoop::new();
     let window = WindowBuilder::new()
@@ -19,7 +22,7 @@ fn main() {
         .unwrap();
 
     //println!("Window shown in {:.2?}.", before.elapsed());
-
+    // let json = executor::block_on(load_json("https://api.github.com/"));
     let size = window.inner_size();
 
     let mut camera = OrbitCamera::new(

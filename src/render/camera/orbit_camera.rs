@@ -1,8 +1,17 @@
 use glam::{Mat4, Vec3};
 #[cfg(target_arch = "wasm32")]
 use wasm_bindgen::prelude::*;
-
+use futures::executor;
+use crate::loaders::json_loader;
 use crate::{extras::math::vector3::Vector3, render::camera::Camera};
+
+#[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
+extern "C" {
+    /// Log a string value to the console.
+    #[allow(unused)]
+    #[wasm_bindgen(js_namespace = console)]
+    fn log(s: &str);
+}
 
 /// An [OrbitCamera] only permits rotation of the eye on a spherical shell around a target.
 #[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
@@ -74,6 +83,10 @@ impl OrbitCamera {
             znear: 0.1,
             zfar: 1000.0,
         };
+        log("created new camera");
+        // json_loader::load_json("https://api.github.com/".to_string());
+        // json_loader::load_json("https://api.github.com/".to_string());
+        // let json = executor::block_on(json_loader::load_json("http://127.0.0.1:8080/glossary.json".to_string()));
         camera.update();
         camera
     }

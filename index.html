@@ -16,7 +16,7 @@
     <canvas id="wgc_1" style="width: 100%; height: 100%; display: block; margin: 0px;"></canvas>
 
     <script type="module">
-        import init, { WebGLRenderer } from './pkg/wgpu_shape_renderer.js';
+        import init, { WebGLRenderer, load_json, fetch_json_js, fetch_binary_js, Nifti1Header } from './pkg/wgpu_shape_renderer.js';
 
         let isDragRotate = false;
         const MOUSE_SPEED = 0.025;
@@ -32,7 +32,12 @@
 
         async function run() {
             await init();
-
+            // const json = await fetch_json("http://127.0.0.1:8080/glossary.json");
+            // const bin = await fetch_binary("http://127.0.0.1:8080/glossary.json");
+            const nifti = await Nifti1Header.load_from_url("http://127.0.0.1:8080/mni152.nii");
+            console.log(nifti);
+            // console.log("file is " + bin.length + " bytes");
+            // console.log(json);
             const canvas = document.querySelector("#wgc_1");
             let width = canvas.clientWidth;
             let height = canvas.clientHeight;
