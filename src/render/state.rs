@@ -332,14 +332,14 @@ impl State {
         let vertex_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
             label: Some("Vertex Buffer"),
             contents: bytemuck::cast_slice(&vertices),
-            usage: wgpu::BufferUsages::VERTEX,
+            usage: wgpu::BufferUsages::VERTEX | wgpu::BufferUsages::COPY_DST,
         });
         #[cfg(not(feature = "indexed"))]
         let num_indices = vertices.len() as u32;
         let index_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
             label: Some("Index Buffer"),
             contents: bytemuck::cast_slice(&indices),
-            usage: wgpu::BufferUsages::INDEX,
+            usage: wgpu::BufferUsages::INDEX | wgpu::BufferUsages::COPY_DST,
         });
         #[cfg(feature = "indexed")]
         let num_indices = indices.len() as u32;
@@ -421,6 +421,36 @@ impl State {
             0,
             bytemuck::cast_slice(&[self.light_uniform]),
         );
+    }
+
+    pub fn update_box_size(&mut self, new_size: Vec3) {
+        let (vertices, indices) = get_box_vertecies(
+            0,
+            Vec3::new(0.0, 0.0, 0.0),
+            new_size,
+            Vec3::new(0.0, 0.0, 0.0),
+        );        
+
+        self.queue.write_buffer(
+            &self.vertex_buffer,
+            0,
+            bytemuck::cast_slice(&vertices),
+        );
+
+        self.queue.write_buffer(
+            &self.index_buffer,
+            0,
+            bytemuck::cast_slice(&indices),
+        );
+        
+        #[cfg(not(feature = "indexed"))]
+        let num_indices = vertices.len() as u32;
+        
+        #[cfg(feature = "indexed")]
+        let num_indices = indices.len() as u32;
+
+        self.num_indices = num_indices;
+        
     }
 
     /// Renders the scene based on the [State].

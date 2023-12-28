@@ -62,6 +62,13 @@ pub struct Nifti1Header {
     magic: [u8; 4],
 }
 
+#[derive(Serialize)]
+pub struct NiftiData {
+    pub header: Nifti1Header,
+    pub image: Vec<u8>,
+    pub texture: Vec<[u8; 4]>
+}
+
 #[wasm_bindgen]
 impl Nifti1Header {
     #[wasm_bindgen]
@@ -92,9 +99,9 @@ impl Nifti1Header {
         }
         Ok(serde_wasm_bindgen::to_value(&nifti_header).unwrap())
     }
-
+    
     #[wasm_bindgen]
-    pub async fn load_and_create_texture_from_url(url: String) -> Result<(JsValue, JsValue), JsError> {
+    pub async fn load_and_create_texture_from_url(url: String) -> Result<JsValue, JsError> {
         // Load the entire binary data from the URL
         let binary_data: Vec<u8>;
         match utils::fetch_binary(url.clone()).await {
@@ -120,18 +127,20 @@ impl Nifti1Header {
         let color_lut = generate_color_lookup_table();
 
         // Calculate the size of the 3D texture
-        let width = (nifti_header.dim[1] * nifti_header.pixdim[1]) as usize;
-        let height = (nifti_header.dim[2] * nifti_header.pixdim[2]) as usize;
-        let depth = (nifti_header.dim[3] * nifti_header.pixdim[3]) as usize;
+        let width = (nifti_header.dim[1] as f32 * nifti_header.pixdim[1]) as usize;
+        let height = (nifti_header.dim[2] as f32 * nifti_header.pixdim[2]) as usize;
+        let depth = (nifti_header.dim[3] as f32 * nifti_header.pixdim[3]) as usize;
 
         // Create a 3D texture using the voxel data and apply the color lookup table
         let texture_data = create_3d_texture_from_voxel_data(width, height, depth, voxel_data, color_lut);
 
         // Convert the NIfTI header and texture data to JsValue
-        let nifti_header_js = serde_wasm_bindgen::to_value(nifti_header).unwrap();
-        let texture_data_js = serde_wasm_bindgen::to_value(&texture_data).unwrap();
-
-        Ok((nifti_header_js, texture_data_js))
+        // let nifti_header_js = serde_wasm_bindgen::to_value(nifti_header).unwrap();
+        // let texture_data_js = serde_wasm_bindgen::to_value(&texture_data).unwrap();
+        let nifti_data_struct = NiftiData {header: *nifti_header, image: nifti_data, texture: texture_data};
+        let nifti_data_js = serde_wasm_bindgen::to_value(&nifti_data_struct);
+        // Ok((nifti_header_js, texture_data_js))
+        Ok(nifti_data_js.unwrap())
     }
    
 }

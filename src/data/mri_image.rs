@@ -2,13 +2,9 @@ use wgpu::{BindGroup, Buffer, Device, Queue, Texture, TextureView};
 
 pub trait MRIImage {
     fn update_mesh_and_texture(&self);
-    fn get_mesh(&self) -> &WebGPUMesh {
-        &self.mesh
-    }
+    fn get_mesh(&self) -> &WebGPUMesh;
 
-    fn get_texture(&self) -> &WebGPU3DTexture {
-        &self.texture
-    }
+    fn get_texture(&self) -> &WebGPU3DTexture;
 }
 
 // Define a struct for the WebGPU mesh

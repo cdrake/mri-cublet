@@ -1,6 +1,7 @@
 #![cfg(target_arch = "wasm32")]
 use crate::render::{camera::OrbitCamera, state::State};
 use wasm_bindgen::{prelude::*, JsCast};
+use js_sys::{Array, Reflect, Float32Array};
 
 #[wasm_bindgen]
 extern "C" {
@@ -83,6 +84,12 @@ impl WebGLRenderer {
     #[wasm_bindgen]
     pub fn update(&mut self) {
         self.state.update();
+    }
+
+    #[wasm_bindgen]
+    pub fn update_box_size(&mut self, width: f32, height: f32, depth: f32) {
+        let vec = glam::Vec3::new(width, height, depth);
+        self.state.update_box_size(vec);
     }
 
     #[wasm_bindgen]

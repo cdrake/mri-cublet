@@ -13,15 +13,18 @@
 </style>
 
 <body style="background-color: white; margin: 0; overflow: hidden; width: 100%; height: 100%;">
-    <canvas id="wgc_1" style="width: 100%; height: 100%; display: block; margin: 0px;"></canvas>
-
+    <canvas id="wgc_1" style="width: 100%; height: 90%; display: block; margin: 0px;"></canvas>
+    <div>
+        <button id="loadNiftiButton">Load Nifti</button>
+    </div>
     <script type="module">
         import init, { WebGLRenderer, load_json, fetch_json_js, fetch_binary_js, Nifti1Header } from './pkg/wgpu_shape_renderer.js';
-
+        const loadNiftiButton = document.getElementById("loadNiftiButton");
+        loadNiftiButton.onclick = loadNifti;
         let isDragRotate = false;
         const MOUSE_SPEED = 0.025;
         const ZOOM_SPEED = 0.01;
-
+        let state = null;
         let previousDistance = undefined;
         let touchstartX = undefined;
         let touchstartY = undefined;
@@ -30,12 +33,29 @@
         const ZOOM_SPEED_TOUCH = 0.001;
         const TOUCH_SPEED = 0.01;
 
+        async function loadNifti() {
+            const nifti = await Nifti1Header.load_from_url("http://127.0.0.1:8080/mni152.nii");
+            
+            console.log(nifti);
+            const nifti_data = await Nifti1Header.load_and_create_texture_from_url("http://127.0.0.1:8080/mni152.nii");
+            console.log(nifti_data);
+            const a = nifti_data.header.dim;
+            const b = nifti_data.header.pixdim;
+            let arr = a.map((e, i) => e * b[i]);
+            const maxSize = Math.max(...arr);
+            arr = arr.map(e => e / maxSize);
+            arr = arr.slice(1, 4);
+            console.log("arr", arr);
+            state.update_box_size(...arr);
+            state.render();
+
+        }
+
         async function run() {
             await init();
             // const json = await fetch_json("http://127.0.0.1:8080/glossary.json");
             // const bin = await fetch_binary("http://127.0.0.1:8080/glossary.json");
-            const nifti = await Nifti1Header.load_from_url("http://127.0.0.1:8080/mni152.nii");
-            console.log(nifti);
+            
             // console.log("file is " + bin.length + " bytes");
             // console.log(json);
             const canvas = document.querySelector("#wgc_1");
@@ -44,7 +64,7 @@
             canvas.width = width;
             canvas.height = height;
 
-            let state = new WebGLRenderer('wgc_1', width, height);
+            state = new WebGLRenderer('wgc_1', width, height);
             state.update();
             state.render();
 
