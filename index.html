@@ -34,19 +34,23 @@
         const TOUCH_SPEED = 0.01;
 
         async function loadNifti() {
-            const nifti = await Nifti1Header.load_from_url("http://127.0.0.1:8080/mni152.nii");
-            
-            console.log(nifti);
-            const nifti_data = await Nifti1Header.load_and_create_texture_from_url("http://127.0.0.1:8080/mni152.nii");
+            // const nifti = await Nifti1Header.load_from_url("http://127.0.0.1:8080/mni152.nii");
+            // const nifti = await Nifti1Header.load_from_url("http://127.0.0.1:8080/hippo.nii");
+            // const nifti = await Nifti1Header.load_from_url("http://127.0.0.1:8080/minimal.nii");
+            // const nifti = await Nifti1Header.load_from_url("http://127.0.0.1:8080/torso.nii");
+            // console.log(nifti);
+            // const nifti_data = await Nifti1Header.load_and_create_texture_from_url("http://127.0.0.1:8080/mni152.nii");
+            const nifti_data = await Nifti1Header.load_and_create_texture_from_url("http://127.0.0.1:8080/torso.nii");
             console.log(nifti_data);
             const a = nifti_data.header.dim;
             const b = nifti_data.header.pixdim;
             let arr = a.map((e, i) => e * b[i]);
             const maxSize = Math.max(...arr);
-            arr = arr.map(e => e / maxSize);
+            // arr = arr.map(e => e / maxSize);
             arr = arr.slice(1, 4);
             console.log("arr", arr);
             state.update_box_size(...arr);
+            state.update();
             state.render();
 
         }

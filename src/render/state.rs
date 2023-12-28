@@ -2,6 +2,7 @@ use glam::Vec3;
 #[cfg(target_arch = "wasm32")]
 use wasm_bindgen::prelude::*;
 use wgpu::util::DeviceExt;
+use std::f32::consts::PI;
 
 use crate::render::{
     camera::{CameraUniform, OrbitCamera},
@@ -17,6 +18,56 @@ use crate::render::{
 const MSAA_SAMPLE_COUNT: u32 = 4;
 #[cfg(not(feature = "msaa"))]
 const MSAA_SAMPLE_COUNT: u32 = 1;
+
+const VERTICAL_FOV: f32 = PI / 2.0; // 90 degrees in radians
+
+type BoundingBox = ([f32; 3], [f32; 3]);
+
+// fn calculate_distance_for_entire_mesh(bounding_box: BoundingBox, vertical_fov: f32) -> f32 {
+//     // Calculate the mesh size
+//     let mesh_width = bounding_box.1[0] - bounding_box.0[0];
+//     let mesh_height = bounding_box.1[1] - bounding_box.0[1];
+//     let mesh_depth = bounding_box.1[2] - bounding_box.0[2];
+
+//     // Calculate the necessary distance
+//     let half_vertical_fov = vertical_fov / 2.0;
+//     let distance = f32::max(
+//         mesh_width / (2.0 * f32::tan(half_vertical_fov)),
+//         f32::max(mesh_height / (2.0 * f32::tan(half_vertical_fov)), mesh_depth / (2.0 * f32::tan(half_vertical_fov))),
+//     );
+
+//     distance
+// }
+fn calculate_distance_for_entire_mesh(bounding_box: BoundingBox, vertical_fov: f32) -> f32 {
+    // Calculate the mesh size
+    let mesh_width = bounding_box.1[0] - bounding_box.0[0];
+    let mesh_height = bounding_box.1[1] - bounding_box.0[1];
+    let mesh_depth = bounding_box.1[2] - bounding_box.0[2];
+
+    // Calculate the necessary distance
+    let half_vertical_fov = vertical_fov / 2.0;
+    let distance = f32::max(
+        mesh_width / (2.0 * f32::tan(half_vertical_fov)),
+        f32::max(mesh_height / (2.0 * f32::tan(half_vertical_fov)), mesh_depth / (2.0 * f32::tan(half_vertical_fov))),
+    );
+
+    distance * 2.0
+}
+
+fn calculate_bounding_box(vertices: &[Vertex]) -> BoundingBox {
+    let mut min = [f32::INFINITY; 3];
+    let mut max = [f32::NEG_INFINITY; 3];
+
+    for vertex in vertices {
+        for i in 0..3 {
+            // Update min and max for each axis
+            min[i] = min[i].min(vertex.position[i]);
+            max[i] = max[i].max(vertex.position[i]);
+        }
+    }
+
+    (min, max)
+}
 
 /// The state holds all data about the rendering cycle and the objects that are drawn to the screen.
 #[cfg_attr(target_arch = "wasm32", wasm_bindgen)]
@@ -450,6 +501,11 @@ impl State {
         let num_indices = indices.len() as u32;
 
         self.num_indices = num_indices;
+
+        // update the camera so we can see the box
+        let bounding_box = calculate_bounding_box(&vertices);
+        let distance = calculate_distance_for_entire_mesh(bounding_box, VERTICAL_FOV);
+        self.camera.set_distance(distance);
         
     }
 

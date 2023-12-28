@@ -39,7 +39,7 @@ fn main() {
     // State::new uses async code, so we're going to wait for it to finish
     let mut state = pollster::block_on(State::new(&window, size.width, size.height, camera));
 
-    //println!("Setup done in {:.2?}.", before.elapsed());
+    // println!("Setup done in {:.2?}.", before.elapsed());
 
     event_loop.run(move |event, _, control_flow| {
         *control_flow = ControlFlow::Wait;

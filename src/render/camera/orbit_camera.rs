@@ -97,6 +97,8 @@ impl OrbitCamera {
     ///
     /// * `distance`: The euclidean distance between the cameras' eye and the target.
     pub fn set_distance(&mut self, distance: f32) {
+        log("set distance called");
+        log(&format!("The distance is {}", distance));
         self.distance = distance.clamp(
             self.bounds.min_distance.unwrap_or(f32::EPSILON),
             self.bounds.max_distance.unwrap_or(f32::MAX),

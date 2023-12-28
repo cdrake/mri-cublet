@@ -1,7 +1,7 @@
 [package]
-name = "efficient_cube"
+name = "mri_cublet"
 version = "0.1.0"
-authors = ["FrankenApps"]
+authors = ["cdrake"]
 edition = "2021"
 
 [features]
